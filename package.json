@@ -1,0 +1,15 @@
+{
+  "name": "ventas-sin-fronteras",
+  "version": "1.0.0",
+  "description": "Sistema de Registro y Monitoreo de Clientes 24/7",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": ["ventas", "clientes", "monitoreo", "sqlite"],
+  "author": "Ventas Sin Fronteras",
+  "license": "ISC"
+}
