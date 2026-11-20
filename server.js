@@ -47,7 +47,7 @@ function parseRequestBody(req) {
     });
     req.on('end', () => {
       if (!body) return resolve({});
-      try { resolve(JSON.parse(body)); } catch (err) { reject(new Error('JSON invÃ¡lido')); }
+      try { resolve(JSON.parse(body)); } catch (err) { reject(new Error('JSON invalido')); }
     });
     req.on('error', reject);
   });
@@ -85,7 +85,7 @@ const server = http.createServer(async (req, res) => {
       let { cedula, nombre, estado, telefono } = data;
 
       if (!cedula || !nombre || !estado) {
-        return sendJSON(res, 400, { success: false, error: 'CÃ©dula, nombre y estado son obligatorios.' });
+        return sendJSON(res, 400, { success: false, error: 'C\u00E9dula, nombre y estado son obligatorios.' });
       }
 
       cedula = String(cedula).trim().toUpperCase();
@@ -98,7 +98,7 @@ const server = http.createServer(async (req, res) => {
       if (existe) {
         return sendJSON(res, 409, {
           success: false,
-          error: `Ya existe un cliente con la cÃ©dula ${cedula} (${existe.nombre}).`
+          error: `Ya existe un cliente con la c\u00E9dula ${cedula} (${existe.nombre}).`
         });
       }
 
@@ -128,7 +128,7 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
-  // 2. GET /api/clientes (Listar clientes con bÃºsqueda)
+  // 2. GET /api/clientes (Listar clientes con busqueda)
   if (pathname === '/api/clientes' && method === 'GET') {
     const search = (parsedUrl.searchParams.get('search') || '').toLowerCase().trim();
     const estadoFilter = parsedUrl.searchParams.get('estado') || '';
@@ -152,7 +152,7 @@ const server = http.createServer(async (req, res) => {
     });
   }
 
-  // 3. GET /api/stats (MÃ©tricas y conteo por estado para monitoreo)
+  // 3. GET /api/stats (Metricas y conteo por estado para monitoreo)
   if (pathname === '/api/stats' && method === 'GET') {
     const total = dbData.clientes.length;
 
@@ -201,7 +201,7 @@ const server = http.createServer(async (req, res) => {
 
   // 5. GET /api/export.csv (Descargar CSV)
   if (pathname === '/api/export.csv' && method === 'GET') {
-    let csv = '\uFEFFID,CÃ©dula,Nombre Completo,Estado,TelÃ©fono,Fecha de Registro\n';
+    let csv = '\uFEFFID,C\u00E9dula,Nombre Completo,Estado,Tel\u00E9fono,Fecha de Registro\n';
     for (const r of dbData.clientes) {
       const nom = `"${(r.nombre || '').replace(/"/g, '""')}"`;
       const est = `"${(r.estado || '').replace(/"/g, '""')}"`;
@@ -214,7 +214,7 @@ const server = http.createServer(async (req, res) => {
     return res.end(csv);
   }
 
-  // Servir archivos estÃ¡ticos si existen en public/
+  // Servir archivos estaticos si existen en public/
   let filePath = path.join(PUBLIC_DIR, pathname === '/' ? 'index.html' : pathname);
   if (pathname === '/dashboard' || pathname === '/admin') {
     filePath = path.join(PUBLIC_DIR, 'dashboard.html');
@@ -230,7 +230,7 @@ const server = http.createServer(async (req, res) => {
     return fs.createReadStream(filePath).pipe(res);
   }
 
-  // RESPALDO INCORPORADO (Por si la carpeta public no se subiÃ³ a GitHub):
+  // RESPALDO INCORPORADO (HTML con tildes protegidas en formato entidad):
   if (pathname === '/' || pathname === '/index.html') {
     res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
     return res.end(HTML_FORMULARIO);
@@ -245,7 +245,7 @@ const server = http.createServer(async (req, res) => {
   res.end('404 No Encontrado');
 });
 
-// HTML EMBEBIDO DEL FORMULARIO DE CLIENTES (Garantiza funcionamiento 100% en la nube)
+// HTML DEL FORMULARIO CON ENTIDADES HTML (Nunca se corrompen los acentos)
 const HTML_FORMULARIO = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -290,7 +290,7 @@ const HTML_FORMULARIO = `<!DOCTYPE html>
 
       <form id="registroForm" class="space-y-4" onsubmit="registrarCliente(event)">
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">CÃ©dula de Identidad <span class="text-rose-500">*</span></label>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">C&eacute;dula de Identidad <span class="text-rose-500">*</span></label>
           <div class="flex gap-2">
             <select id="tipoCedula" class="w-20 px-2.5 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-bold text-sm focus:border-blue-600 focus:bg-white focus:outline-none">
               <option value="V-">V-</option><option value="E-">E-</option><option value="J-">J-</option><option value="G-">G-</option><option value="">Doc</option>
@@ -301,14 +301,38 @@ const HTML_FORMULARIO = `<!DOCTYPE html>
 
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Nombre y Apellido <span class="text-rose-500">*</span></label>
-          <input type="text" id="nombre" autocapitalize="words" placeholder="Ej: Carlos Eduardo PÃ©rez" required class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold placeholder-slate-400 text-sm focus:border-blue-600 focus:bg-white focus:outline-none">
+          <input type="text" id="nombre" autocapitalize="words" placeholder="Ej: Carlos Eduardo P&eacute;rez" required class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold placeholder-slate-400 text-sm focus:border-blue-600 focus:bg-white focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Â¿Desde quÃ© Estado compras? <span class="text-rose-500">*</span></label>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">&iquest;Desde qu&eacute; Estado compras? <span class="text-rose-500">*</span></label>
           <select id="estado" required onchange="verificarOtro(this.value)" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold text-sm focus:border-blue-600 focus:bg-white focus:outline-none">
             <option value="" disabled selected>-- Elige tu Estado --</option>
-            <option value="Amazonas">Amazonas</option><option value="AnzoÃ¡tegui">AnzoÃ¡tegui</option><option value="Apure">Apure</option><option value="Aragua">Aragua</option><option value="Barinas">Barinas</option><option value="BolÃ­var">BolÃ­var</option><option value="Carabobo">Carabobo</option><option value="Cojedes">Cojedes</option><option value="Delta Amacuro">Delta Amacuro</option><option value="Distrito Capital">Distrito Capital (Caracas)</option><option value="FalcÃ³n">FalcÃ³n</option><option value="GuÃ¡rico">GuÃ¡rico</option><option value="La Guaira">La Guaira</option><option value="Lara">Lara</option><option value="MÃ©rida">MÃ©rida</option><option value="Miranda">Miranda</option><option value="Monagas">Monagas</option><option value="Nueva Esparta">Nueva Esparta (Margarita)</option><option value="Portuguesa">Portuguesa</option><option value="Sucre">Sucre</option><option value="TÃ¡chira">TÃ¡chira</option><option value="Trujillo">Trujillo</option><option value="Yaracuy">Yaracuy</option><option value="Zulia">Zulia</option><option value="OTRO">Otro Estado o RegiÃ³n...</option>
+            <option value="Amazonas">Amazonas</option>
+            <option value="Anzo&aacute;tegui">Anzo&aacute;tegui</option>
+            <option value="Apure">Apure</option>
+            <option value="Aragua">Aragua</option>
+            <option value="Barinas">Barinas</option>
+            <option value="Bol&iacute;var">Bol&iacute;var</option>
+            <option value="Carabobo">Carabobo</option>
+            <option value="Cojedes">Cojedes</option>
+            <option value="Delta Amacuro">Delta Amacuro</option>
+            <option value="Distrito Capital">Distrito Capital (Caracas)</option>
+            <option value="Falc&oacute;n">Falc&oacute;n</option>
+            <option value="Gu&aacute;rico">Gu&aacute;rico</option>
+            <option value="La Guaira">La Guaira</option>
+            <option value="Lara">Lara</option>
+            <option value="M&eacute;rida">M&eacute;rida</option>
+            <option value="Miranda">Miranda</option>
+            <option value="Monagas">Monagas</option>
+            <option value="Nueva Esparta">Nueva Esparta (Margarita)</option>
+            <option value="Portuguesa">Portuguesa</option>
+            <option value="Sucre">Sucre</option>
+            <option value="T&aacute;chira">T&aacute;chira</option>
+            <option value="Trujillo">Trujillo</option>
+            <option value="Yaracuy">Yaracuy</option>
+            <option value="Zulia">Zulia</option>
+            <option value="OTRO">Otro Estado o Regi&oacute;n...</option>
           </select>
         </div>
 
@@ -317,7 +341,7 @@ const HTML_FORMULARIO = `<!DOCTYPE html>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">TelÃ©fono / WhatsApp <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">Tel&eacute;fono / WhatsApp <span class="text-slate-400 font-normal lowercase">(opcional)</span></label>
           <input type="tel" id="telefono" inputmode="tel" placeholder="Ej: 0414-1234567" class="w-full px-4 py-3 rounded-2xl bg-slate-50 border border-slate-200 text-slate-900 font-semibold placeholder-slate-400 text-sm focus:border-blue-600 focus:bg-white focus:outline-none font-mono">
         </div>
 
@@ -330,14 +354,14 @@ const HTML_FORMULARIO = `<!DOCTYPE html>
         <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center mx-auto mb-4 border-4 border-blue-100">
           <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" /></svg>
         </div>
-        <h3 class="text-xl font-black text-slate-900 mb-1">Â¡Registro Exitoso!</h3>
+        <h3 class="text-xl font-black text-slate-900 mb-1">&iexcl;Registro Exitoso!</h3>
         <p class="text-xs text-slate-600 mb-5">Tus datos han sido registrados en <strong>Ventas Sin Fronteras</strong>.</p>
-        <button onclick="nuevoRegistro()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">â† Registrar a otro cliente</button>
+        <button onclick="nuevoRegistro()" class="w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-all">&larr; Registrar a otro cliente</button>
       </div>
     </div>
   </main>
 
-  <footer class="max-w-md mx-auto w-full text-center text-[11px] text-slate-400 py-3">Â© 2026 Ventas Sin Fronteras â€¢ Nube 24/7</footer>
+  <footer class="max-w-md mx-auto w-full text-center text-[11px] text-slate-400 py-3">&copy; 2026 Ventas Sin Fronteras &bull; Nube 24/7</footer>
 
   <script>
     function verificarOtro(v) {
@@ -377,7 +401,7 @@ const HTML_FORMULARIO = `<!DOCTYPE html>
           document.getElementById('registroForm').classList.add('hidden');
           document.getElementById('successCard').classList.remove('hidden');
         } else {
-          mostrarAlerta(data.error || 'OcurriÃ³ un error');
+          mostrarAlerta(data.error || 'Ocurri\u00F3 un error');
         }
       } catch(e) {
         mostrarAlerta('No se pudo conectar con el servidor.');
@@ -396,7 +420,7 @@ const HTML_FORMULARIO = `<!DOCTYPE html>
 </body>
 </html>`;
 
-// HTML EMBEBIDO DEL DASHBOARD DE MONITOREO
+// HTML DEL DASHBOARD DE MONITOREO
 const HTML_DASHBOARD = `<!DOCTYPE html>
 <html lang="es">
 <head>
@@ -417,7 +441,7 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
         </div>
         <div>
           <h1 class="text-lg font-extrabold text-blue-900">Ventas Sin Fronteras</h1>
-          <span class="text-xs font-semibold text-emerald-600">â— Nube 24/7 Activa</span>
+          <span class="text-xs font-semibold text-emerald-600">&bull; Nube 24/7 Activa</span>
         </div>
       </div>
       <div class="flex items-center gap-2">
@@ -434,7 +458,7 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
         <h2 id="kpiTotal" class="text-3xl font-extrabold text-slate-900 mt-1">0</h2>
       </div>
       <div class="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm">
-        <p class="text-xs font-bold uppercase text-slate-500">Estado LÃ­der</p>
+        <p class="text-xs font-bold uppercase text-slate-500">Estado L&iacute;der</p>
         <h2 id="kpiTopEstado" class="text-2xl font-extrabold text-blue-800 mt-1 truncate">--</h2>
       </div>
       <div class="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm">
@@ -453,7 +477,7 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
         <div class="h-64"><canvas id="barChart"></canvas></div>
       </div>
       <div class="bg-white border border-blue-100 rounded-2xl p-5 shadow-sm flex flex-col justify-between">
-        <h3 class="text-base font-bold text-slate-900">DistribuciÃ³n Porcentual</h3>
+        <h3 class="text-base font-bold text-slate-900">Distribuci&oacute;n Porcentual</h3>
         <div class="h-60 flex items-center justify-center my-auto"><canvas id="pieChart"></canvas></div>
         <div id="resumenEstados" class="text-xs text-slate-500 text-center pt-2 border-t border-slate-100">Cargando...</div>
       </div>
@@ -462,13 +486,13 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
     <div class="bg-white border border-blue-100 rounded-2xl shadow-sm overflow-hidden">
       <div class="p-5 border-b border-slate-100 flex justify-between items-center bg-slate-50">
         <h3 class="text-base font-bold text-slate-900">Directorio de Clientes</h3>
-        <input type="text" id="searchInput" oninput="filtrar()" placeholder="Buscar por cÃ©dula o nombre..." class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs">
+        <input type="text" id="searchInput" oninput="filtrar()" placeholder="Buscar por c&eacute;dula o nombre..." class="px-3 py-1.5 rounded-xl border border-slate-300 text-xs">
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
           <thead class="bg-slate-100 font-bold text-slate-600 border-b">
             <tr>
-              <th class="py-3 px-4"># ID</th><th class="py-3 px-4">CÃ©dula</th><th class="py-3 px-4">Nombre</th><th class="py-3 px-4">Estado</th><th class="py-3 px-4">TelÃ©fono</th><th class="py-3 px-4">Fecha</th><th class="py-3 px-4 text-right">AcciÃ³n</th>
+              <th class="py-3 px-4"># ID</th><th class="py-3 px-4">C&eacute;dula</th><th class="py-3 px-4">Nombre</th><th class="py-3 px-4">Estado</th><th class="py-3 px-4">Tel&eacute;fono</th><th class="py-3 px-4">Fecha</th><th class="py-3 px-4 text-right">Acci&oacute;n</th>
             </tr>
           </thead>
           <tbody id="tablaBody" class="divide-y divide-slate-100 font-medium">
@@ -515,7 +539,7 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
     function renderTabla(list) {
       const tbody = document.getElementById('tablaBody');
       if (list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-400">No hay clientes registrados aÃºn.</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-slate-400">No hay clientes registrados todav&iacute;a.</td></tr>';
         return;
       }
       tbody.innerHTML = list.map(c => \`
@@ -527,14 +551,14 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
           <td class="py-3 px-4 font-mono text-slate-600">\${c.telefono || '-'}</td>
           <td class="py-3 px-4 text-slate-400 text-[11px] font-mono">\${c.fecha_registro}</td>
           <td class="py-3 px-4 text-right">
-            <button onclick="eliminar(\${c.id})" class="text-rose-500 hover:text-rose-700 font-bold">âœ•</button>
+            <button onclick="eliminar(\${c.id})" class="text-rose-500 hover:text-rose-700 font-bold">&times;</button>
           </td>
         </tr>
       \`).join('');
     }
 
     async function eliminar(id) {
-      if (!confirm('Â¿Eliminar cliente?')) return;
+      if (!confirm('\u00BFEliminar cliente?')) return;
       await fetch('/api/clientes/' + id, { method: 'DELETE' });
       cargar();
     }
@@ -557,7 +581,7 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
       });
 
-      document.getElementById('resumenEstados').innerHTML = porEstado.length > 0 ? \`LÃ­der: <strong>\${porEstado[0].estado}</strong> con \${porEstado[0].cantidad} cliente(s)\` : 'Sin datos';
+      document.getElementById('resumenEstados').innerHTML = porEstado.length > 0 ? \`L&iacute;der: <strong>\${porEstado[0].estado}</strong> con \${porEstado[0].cantidad} cliente(s)\` : 'Sin datos';
     }
 
     window.onload = () => { cargar(); setInterval(cargar, 15000); };
@@ -567,6 +591,6 @@ const HTML_DASHBOARD = `<!DOCTYPE html>
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n======================================================`);
-  console.log(`ðŸš€ Ventas Sin Fronteras ACTIVO en puerto ${PORT}`);
+  console.log(`Ventas Sin Fronteras ACTIVO en puerto ${PORT}`);
   console.log(`======================================================\n`);
 });
